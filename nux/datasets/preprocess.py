@@ -15,27 +15,7 @@ def filter_func(example, epsilon=0.1):
     shape = example["value_shape"]
     return (rotation >= 0+epsilon) and (rotation <= (np.pi/2)-epsilon) and (shape == 1)
 
-def change_color(example):
-    '''
-    Function to change the color of the image
-    :param example, with white objects:
-    :return example that can be one from 18 colors defined in list_of_colors:
-    '''
 
-    ind = tf.random.uniform(shape=(), minval=0, maxval=len(list_of_colors)-1, dtype=tf.int32)
-    color = list_of_colors[ind] # Randomly choose a color from the list
-    color_label = list_of_colors_labels[ind]
-    example["value_color"] = color
-    example["label_color"] = color_label
-
-    #image = tf.image.grayscale_to_rgb(example["image"]) # Convert the grayscale image to RGB
-    image = tf.repeat(example["image"], repeats=3, axis=-1)*255 # Repeat the channel dimension to get a 3-channel image
-    image = tf.where(tf.math.equal(image, 255), color, image) # Replace the grayscale value with the chosen color
-    #image = tf.repeat(example["image"], 3, axis=-1)
-    #image = tf.cast(image, tf.float32)
-    example["image"] = image
-
-    return example
 
 def change_colors(example, ind):
     color = list_of_colors[ind] # Choose a color from the list
@@ -52,6 +32,7 @@ def change_colors(example, ind):
 
 
 def modify_dsprites(ds):
+
     # Create a list of datasets with different color for each example
     colored_datasets = [
         ds.map(lambda x: change_colors(x, ind), num_parallel_calls=tf.data.AUTOTUNE)
@@ -79,7 +60,28 @@ list_of_colors_labels =  np.arange(0,len(list_of_colors))
 list_of_colors = tf.convert_to_tensor(list_of_colors, dtype=tf.uint8)
 list_of_colors_labels = tf.convert_to_tensor(list_of_colors_labels)
 
+def change_color(example):
+    '''
+    Function to change the color of the image
+    :param example, with white objects:
+    :return example that can be one from 18 colors defined in list_of_colors:
+    '''
 
+    ind = tf.random.uniform(shape=(), minval=0, maxval=len(list_of_colors)-1, dtype=tf.int32)
+    color = list_of_colors[ind] # Randomly choose a color from the list
+    color_label = list_of_colors_labels[ind]
+    example["value_color"] = color
+    example["label_color"] = color_label
+
+    #image = tf.image.grayscale_to_rgb(example["image"]) # Convert the grayscale image to RGB
+    image = tf.repeat(example["image"], repeats=3, axis=-1)*255 # Repeat the channel dimension to get a 3-channel image
+    image = tf.where(tf.math.equal(image, 255), color, image) # Replace the grayscale value with the chosen color
+    #image = tf.repeat(example["image"], 3, axis=-1)
+    #image = tf.cast(image, tf.float32)
+    example["image"] = image
+
+    return example
+    
 # Apply the color change function to the dataset
 def change_color_func(example):
     return change_color(example)
@@ -166,58 +168,4 @@ def separate_attributes_to_dict(x):
     #plt.imshow(example['image'])
     #print(example['image'])
     #plt.show()
-'''
 
-
-#lista = []
-for example in ds.take(1):
-#    if example["value_orientation"] not in lista:
-#        print(example["value_orientation"])
-#        lista.append(example["value_orientation"])
-    plt.figure()
-    plt.imshow(example['image'])
-    print(example['image'])
-    plt.show()
-
-
-
-import tensorflow as tf
-import tensorflow_datasets as tfds
-import numpy as np
-
-# Load the dsprites dataset
-ds, ds_info = tfds.load("dsprites", split="train", with_info=True)
-
-# Create a function to apply rotation and color change to an example
-def change_color(example):
-    #Function to change the color of the image
-    #:param example, with white objects:
-    #:return example that can be one from 18 colors defined in list_of_colors:
-
-    ind = tf.random.uniform(shape=(), minval=0, maxval=len(list_of_colors), dtype=tf.int32)
-    color = list_of_colors[ind] # Randomly choose a color from the list
-    color_label = list_of_colors_labels[ind]
-    example["value_color"] = color
-    example["label_color"] = color_label
-
-    image = tf.image.grayscale_to_rgb(example["image"]) # Convert the grayscale image to RGB
-    image = tf.where(tf.math.equal(image, 1), color, image) # Replace the grayscale value with the chosen color
-    example["image"] = image
-
-    return example
-
-# List of 18 random colors to choose from
-list_of_colors = [[230, 25, 75], [60, 180, 75], [255, 225, 25], [0, 130, 200], [245, 130, 48], [145, 30, 180],
-                  [70, 240, 240], [240, 50, 230], [210, 245, 60], [250, 190, 212], [0, 128, 128], [220, 190, 255],
-                  [170, 110, 40], [255, 250, 200], [128, 0, 0], [170, 255, 195], [128, 128, 0], [255, 215, 180],
-                  [0, 0, 128], [128, 128, 128]]
-list_of_colors_labels =  np.arange(0,len(list_of_colors))
-list_of_colors = tf.convert_to_tensor(list_of_colors, dtype=tf.uint8)
-list_of_colors_labels = tf.convert_to_tensor(list_of_colors_labels)
-
-
-
-
-# Apply the change_color function to the dataset
-ds = ds.map(change_color)
-'''

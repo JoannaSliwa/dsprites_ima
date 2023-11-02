@@ -128,11 +128,11 @@ def get_tf_image_dataset(*,
         split = "train[:90%]"
       else:
         split = "train[90%:]"
-      ds = tfds.load("dsprites", split=split) #TODO
-      ds = ds.filter(filter_func) #TODO
-      #ds = ds.map(change_color_func) #TODO
+      ds = tfds.load("dsprites", split=split)
+      ds = ds.filter(filter_func)
+      #ds = ds.map(change_color_func)
       ds = modify_dsprites(ds)
-      ds = ds.map(add_noise_func)  # TODO
+      ds = ds.map(add_noise_func) 
       ds = ds.map(separate_attributes_to_dict)
   else:
     ds = tfds.load(dataset_name, split=split)
